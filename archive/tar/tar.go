@@ -238,6 +238,10 @@ func extractDir(h *tar.Header, target string) error {
 		return fmt.Errorf("create directory <%s>, %w", target, err)
 	}
 
+	if err := os.Chtimes(target, h.ModTime, h.ModTime); err != nil {
+		return fmt.Errorf("chtimes for extracted dir <%s>, %w", target, err)
+	}
+
 	return nil
 }
 
@@ -252,6 +256,10 @@ func extractRegular(h *tar.Header, tr io.Reader, target string) (int64, error) {
 	written, err := io.Copy(f, tr)
 	if err != nil {
 		return written, fmt.Errorf("copy extracted file for writing <%s>, %w", target, err)
+	}
+
+	if err := os.Chtimes(target, h.ModTime, h.ModTime); err != nil {
+		return written, fmt.Errorf("chtimes for extracted file <%s>, %w", target, err)
 	}
 
 	return written, nil
